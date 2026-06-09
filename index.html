@@ -1886,6 +1886,19 @@ footer{
 }
 /* ===== Fim Etapa 1.1 ===== */
 
+/* ===== LANG SWITCH ===== */
+.lang-switch{display:flex;align-items:center;margin-left:.7rem;border:1px solid rgba(0,184,156,.22);border-radius:3px;overflow:hidden;flex-shrink:0}
+.lang-btn{padding:.3rem .55rem;background:transparent;border:0;cursor:pointer;font-family:var(--body);font-size:.62rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#5a7a8c;transition:background .15s,color .15s;line-height:1}
+.lang-btn:hover{background:rgba(0,184,156,.1);color:#008f7a}
+.lang-btn.lang-active{background:var(--teal);color:#fff}
+@media(max-width:960px){.lang-btn{font-size:.58rem;padding:.28rem .48rem}}
+
+/* ===== WA FLOAT ===== */
+.wa-float{position:fixed;bottom:1.6rem;right:1.6rem;z-index:998;width:54px;height:54px;background:#25d366;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(0,0,0,.24);transition:transform .2s,box-shadow .2s;text-decoration:none}
+.wa-float:hover{transform:translateY(-3px) scale(1.06);box-shadow:0 8px 28px rgba(37,211,102,.4)}
+.wa-float svg{width:28px;height:28px;fill:#fff}
+@media(max-width:480px){.wa-float{width:48px;height:48px;bottom:1.2rem;right:1.2rem}.wa-float svg{width:24px;height:24px}}
+
 </style>
 </head>
 <body>
@@ -1905,6 +1918,10 @@ footer{
     <li><a href="#contato">Contato</a></li>
   </ul>
   <a href="#contato" class="nav-cta">Fale conosco</a>
+  <div class="lang-switch">
+    <button class="lang-btn lang-active" id="btn-pt" onclick="setLang('pt')">PT</button>
+    <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+  </div>
 </nav>
 
 <section class="hero" id="inicio">
@@ -2264,12 +2281,15 @@ footer{
     </div>
     <div class="reveal-right">
       <form class="contato-form" onsubmit="handleSubmit(event)">
+        <input type="hidden" name="access_key" value="51e3108e-267c-4aea-bc62-03616ed46e6f">
+        <input type="hidden" name="subject" value="Novo contato — Daxia Consultoria">
+        <input type="hidden" name="from_name" value="Site Daxia">
         <div class="form-row">
-          <input type="text" class="fi" placeholder="Seu nome" required>
-          <input type="email" class="fi" placeholder="E-mail" required>
+          <input type="text" name="nome" class="fi" placeholder="Seu nome" required>
+          <input type="email" name="email" class="fi" placeholder="E-mail" required>
         </div>
-        <input type="text" class="fi" placeholder="Empresa">
-        <textarea class="fi" placeholder="Qual é o seu principal desafio hoje?"></textarea>
+        <input type="text" name="empresa" class="fi" placeholder="Empresa">
+        <textarea name="mensagem" class="fi" placeholder="Qual é o seu principal desafio hoje?"></textarea>
         <button type="submit" class="fs">Enviar mensagem</button>
       </form>
     </div>
@@ -2413,10 +2433,306 @@ document.querySelectorAll('[data-tilt]').forEach((visual)=>{
 
 function handleSubmit(e){
   e.preventDefault();
-  const btn=e.target.querySelector('.fs');
-  btn.textContent='Mensagem enviada ✓';btn.style.background='var(--teal2)';
-  setTimeout(()=>{btn.textContent='Enviar mensagem';btn.style.background='';e.target.reset();},3000);
+  const form=e.target;
+  const btn=form.querySelector('.fs');
+  const orig=btn.textContent;
+  btn.textContent='Enviando…';btn.disabled=true;
+  fetch('https://api.web3forms.com/submit',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Accept':'application/json'},
+    body:JSON.stringify(Object.fromEntries(new FormData(form)))
+  })
+  .then(r=>r.json())
+  .then(data=>{
+    if(data.success){
+      btn.textContent='Mensagem enviada ✓';btn.style.background='var(--teal2)';
+      form.reset();
+      setTimeout(()=>{btn.textContent=orig;btn.style.background='';btn.disabled=false;},4000);
+    } else {
+      btn.textContent='Erro — tente novamente';btn.style.background='#c0392b';
+      setTimeout(()=>{btn.textContent=orig;btn.style.background='';btn.disabled=false;},4000);
+    }
+  })
+  .catch(()=>{
+    btn.textContent='Erro — tente novamente';btn.style.background='#c0392b';
+    setTimeout(()=>{btn.textContent=orig;btn.style.background='';btn.disabled=false;},4000);
+  });
 }
+</script>
+<!-- WhatsApp Float -->
+<a class="wa-float" href="https://wa.me/5531986611405" target="_blank" rel="noopener" aria-label="WhatsApp">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
+<script>
+// ===== i18n =====
+var T={
+pt:{
+  title:'Daxia Consultoria — Gestão & Transformação Digital',
+  'nav.sobre':'Sobre','nav.servicos':'Serviços','nav.projetos':'Projetos','nav.samuel':'Quem sou','nav.parceria':'Parcerias','nav.contato':'Contato','nav.cta':'Fale conosco',
+  'hero.eyebrow':'Consultoria de gestão, dados e tecnologia',
+  'hero.sub':'Entendemos a operação antes de propor qualquer solução. Estruturamos o processo. Depois encontramos ou construímos a ferramenta certa para fazer funcionar.',
+  'hero.btn1':'Fale conosco','hero.btn2':'Ver abordagem',
+  'hero.title':'<span class="solid">Planeje com <span class="key key-method">método</span>.</span><span class="solid">Decida com <span class="key key-data">dados</span>.</span><span class="solid">Transforme com <span class="key key-tech">tecnologia</span>.</span>',
+  'hero.v1':'18+ anos','hero.v3':'Parceiro Oficial Actio',
+  'hero.m1':'Experiência em gestão','hero.m2':'IA e transformação digital','hero.m3':'Plataforma do Grupo Falconi',
+  'mq.1':'Diagnóstico antes da solução','mq.2':'Processos que reduzem retrabalho','mq.3':'Dados que respondem perguntas reais','mq.4':'IA aplicada com critério','mq.5':'Rotina de gestão e acompanhamento','mq.6':'Soluções digitais sob medida',
+  'sobre.eyebrow':'Sobre a Daxia',
+  'sobre.title':'Antes da ferramenta, <span class="accent">o mapa real da operação</span>',
+  'p1t':'Diagnóstico','p1d':'Leitura objetiva da operação, gargalos, responsabilidades e perdas.',
+  'p2t':'Priorização','p2d':'Separação entre sintoma e causa para definir o que precisa vir primeiro.',
+  'p3t':'Execução','p3d':'Processos, indicadores e tecnologia aplicados com rotina de acompanhamento.',
+  'sobre.lead':'A tecnologia só cria valor quando <span class="accent">o problema está bem formulado e o processo está claro.</span>',
+  'sobre.b1':'A Daxia combina gestão, dados e tecnologia para entender a operação, separar sintoma de causa e construir um caminho executável.',
+  'sobre.b2':'Como parceira oficial da Actio, plataforma de gestão do Grupo Falconi, apoiamos a implantação e adoção da plataforma, conectando estratégia, metas, indicadores e rotina de gestão em um único ambiente.',
+  'pq.title':'Para quem é a Daxia',
+  'pq.1':'Empresas que cresceram, mas ainda operam com controles frágeis e decisões dispersas',
+  'pq.2':'Gestores que precisam enxergar gargalos antes que eles virem custo, atraso ou retrabalho',
+  'pq.3':'Organizações que querem usar dados e IA com critério, não como moda',
+  'pq.4':'Lideranças que precisam de método para transformar intenção em execução',
+  'sv.eyebrow':'O que fazemos',
+  'sv.title':'Serviços para transformar <span class="accent">operação em decisão</span>',
+  'sv.intro':'O trabalho pode começar por um diagnóstico pontual ou por uma transformação mais ampla. O critério é sempre o mesmo: entender, priorizar e executar.',
+  'sv.1t':'Diagnóstico da operação','sv.1d':'Identificação objetiva de onde tempo, margem e energia estão sendo perdidos.',
+  'sv.2t':'Processos e rotina de gestão','sv.2d':'Mapeamento e simplificação dos fluxos para reduzir retrabalho e dependência.',
+  'sv.3t':'Indicadores e dados','sv.3d':'Métricas que respondem perguntas reais de gestão e antecipam problemas.',
+  'sv.4t':'Planejamento e governança','sv.4d':'Metas, responsáveis, ritos e disciplina para transformar plano em execução.',
+  'sv.5t':'Digitalização orientada ao fluxo','sv.5d':'Ferramentas desenhadas a partir da rotina de trabalho, não o contrário.',
+  'sv.6t':'Soluções digitais sob medida','sv.6d':'Sistemas, automações e plataformas próprias. Quando o mercado não tem o que você precisa, a gente constrói.',
+  'pj.eyebrow':'Projetos e soluções',
+  'pj.title':'Produtos e cases de <span class="accent">problemas concretos</span>',
+  'pj.tab2':'ERP Construtora','pj.tab3':'Educação',
+  'dl.c':'Desafio','dl.s':'Solução aplicada','dl.r':'Resultados obtidos','dl.re':'Resultados esperados','dl.t':'Tecnologias / Ferramentas',
+  'p0.seg':'Construção civil · Gestão de projetos','p0.c':'Dar visibilidade a uma rotina de obras fragmentada entre cronogramas, registros de campo, equipes e fornecedores.','p0.s':'Plataforma SaaS que conecta acompanhamento de portfólio, diário de obra digital e indicadores executivos.','p0.r':'Operação centralizada, status mais claros e decisões de gestão apoiadas por dados atualizados.','p0.t':'Plataforma SaaS · Dashboard executivo · Diário de obra digital','p0.c1':'Operação conectada','p0.c2':'Dados em tempo real',
+  'p1.seg':'Produto digital · Inteligência artificial generativa','p1.c':'Evitar perda de contexto e ambiguidades entre conversas de descoberta, negócio e desenvolvimento.','p1.s':'Entrevistas guiadas por IA que estruturam requisitos, evidências, lacunas, SRS e Prompt Packs.','p1.r':'Requisitos organizados, lacunas visíveis e passagem de contexto mais consistente para os times.','p1.t':'IA generativa · SRS · Prompt Packs · Saídas estruturadas','p1.c1':'Discovery estruturado','p1.c2':'SRS e Prompt Pack',
+  'p2.nome':'ERP para construtora','p2.seg':'Construção civil · ERP sob medida','p2.c':'Unificar contratos, medições, financeiro e compras antes controlados em fluxos separados.','p2.s':'ERP integrado por obra e centro de custo, com módulos operacionais e dashboard executivo.','p2.r':'Visão única da operação, controles centralizados e indicadores consolidados para a liderança.','p2.t':'ERP web sob medida · Dashboard executivo · Módulos financeiro e compras','p2.c1':'Visão executiva','p2.c2':'Operação centralizada',
+  'p3.nome':'Sistema para escola','p3.seg':'Educação · Gestão operacional','p3.c':'Organizar matrículas, frequência, alunos, responsáveis, equipe e relatórios de uma operação educacional com múltiplas rotinas administrativas.','p3.s':'Sistema web com módulos de alunos, lista de presença, funcionários, mapa de atendimento, indicadores e relatórios gerenciais.','p3.r':'Informação centralizada para a coordenação, acompanhamento mais claro da rotina e visão gerencial para tomada de decisão.','p3.t':'Sistema web sob medida · BI educacional · Gestão de presença · Cadastro de alunos · Relatórios operacionais','p3.c1':'Rotina escolar','p3.c2':'Gestão integrada',
+  'p4.seg':'Carreira · Inteligência artificial aplicada','p4.c':'Transformar LinkedIn e currículo em um diagnóstico acionável de posicionamento profissional.','p4.s':'GapScore™ em seis dimensões, evidências do perfil, benchmark e plano de ação para 7, 30 e 90 dias.','p4.r':'Gaps priorizados, recomendações práticas e relatório permanente entregue por link privado.','p4.t':'Next.js · TypeScript · Supabase · OpenAI API · Mercado Pago Pix · Resend','p4.c1':'Diagnóstico em até 48h','p4.c2':'GapScore™ · 6 dimensões',
+  'p5.seg':'Turismo e hospitalidade · Landing page','p5.c':'Traduzir a experiência e a história do imóvel além do anúncio no Airbnb e orientar a reserva.','p5.s':'Landing page premium e responsiva com narrativa, comodidades e chamadas claras para reserva.','p5.r':'Presença digital própria, diferenciação mais clara e jornada direta até a reserva no Airbnb.','p5.t':'Landing page responsiva · Integração com Airbnb · Design orientado à conversão','p5.c1':'Presença digital própria','p5.c2':'Reserva via Airbnb',
+  'p6.seg':'Esportes e comunidade · Aplicativo mobile','p6.c':'Organizar partidas recorrentes, membros, presença, escalações e finanças em um único fluxo.','p6.s':'Aplicativo mobile para confirmações, check-ins, times, desempenho e controle de pagamentos.','p6.r':'Administração centralizada, presença mais previsível e controle financeiro mais claro para o grupo.','p6.t':'Aplicativo mobile · Gestão de membros · Check-in · Controle financeiro','p6.c1':'Gestão da pelada','p6.c2':'Mobile first',
+  'p7.seg':'Educação familiar · IA aplicada à aprendizagem','p7.c':'Ajudar famílias a transformar conteúdos escolares, habilidades da BNCC ou materiais enviados pelos pais em experiências que a criança realmente queira explorar.','p7.s':'Plataforma educativa com curadoria dos responsáveis, adaptação por idade, série e nível de leitura, gerando histórias em quadrinhos, jogos, quizzes e músicas.','p7.r':'Aprendizagem mais leve, acompanhamento de progresso e experiências personalizadas para a criança entender de verdade: "Fez Plim, aprendeu!".','p7.t':'Produto mobile · IA generativa com aprovação dos responsáveis · BNCC · Jogos educativos · Acompanhamento de progresso','p7.c1':'Fez Plim, aprendeu!','p7.c2':'BNCC em experiências','p7.s1':'<span>1.</span> Escolha o conteúdo','p7.s2':'<span>2.</span> Escolha o formato','p7.s3':'<span>3.</span> Configure a atividade','p7.s4':'<span>4.</span> Aprenda brincando',
+  'sm.eyebrow':'Quem está por trás',
+  'sm.quote':'"A IA democratizou a criação de soluções. A resolução de problemas continua sendo uma competência humana. Por isso começamos entendendo profundamente o problema antes de definir qualquer tecnologia."',
+  'sm.cargo':'Fundador da Daxia · Gestão e transformação operacional',
+  'sm.b1':'Consultor e empreendedor com <strong>mais de 18 anos de experiência</strong> em gestão, processos e transformação operacional em organizações de média e alta complexidade.',
+  'sm.b2':'Conecta estratégia, dados e tecnologia para compreender problemas de negócio, estruturar decisões e construir soluções digitais quando elas realmente fazem sentido.',
+  'sm.c1':'18+ anos de experiência em gestão','sm.c2':'Formação em IA e transformação digital pelo MIT Professional Education','sm.c3':'Parceiro oficial Actio, plataforma de gestão do Grupo Falconi','sm.c4':'Arquiteto de soluções digitais para gestão',
+  'sm.mit':'Inteligência Artificial e Transformação Digital',
+  'par.kicker':'Parceiro oficial Actio Brasil',
+  'par.title':'Estratégia com método. <span>Execução com tecnologia.</span>',
+  'par.body':'A DAXIA atua como parceira comercial e estratégica da Actio, plataforma integrada de gestão corporativa do ecossistema Falconi, apoiando empresas na estruturação, execução e acompanhamento de suas estratégias, indicadores, projetos e iniciativas de transformação.',
+  'par.st1':'anos de mercado','par.st2':'clientes no mundo','par.st3':'usuários','par.st4':'idiomas disponíveis',
+  'par.m1':'Diagnóstico estratégico','par.m2':'Gestão de indicadores e KPIs','par.m3':'Gestão de projetos e portfólio','par.m4':'Governança e compliance','par.m5':'Apoio à implantação e adoção',
+  'par.cta':'Conhecer a Plataforma Actio',
+  'act.grid':'<span>Estratégia<br>Performance</span><span>Risco<br>Compliance</span><span>Processos<br>Operações</span><span>Pessoas</span>',
+  'act.small':'Plataforma de gestão integrada',
+  'act.note':'Ecossistema Falconi · gestão corporativa · execução estratégica',
+  'act.n1':'Estratégia<small>metas · KPIs</small>','act.n2':'Projetos<small>portfólio</small>','act.n3':'Riscos<small>controles</small>','act.n4':'Pessoas<small>desempenho</small>','act.n5':'Compliance<small>auditoria</small>','act.n6':'IA<small>insights</small>',
+  'ct.eyebrow':'Vamos conversar',
+  'ct.title':'Qual gargalo está <span class="accent">limitando o crescimento?</span>',
+  'ct.lead':'A primeira conversa é para organizar o problema, não para vender uma ferramenta.',
+  'ct.body':'Conte brevemente o desafio: processo, indicador, sistema, rotina de gestão ou decisão que hoje depende de esforço demais. Respondo em até 24 horas.',
+  'ct.btn':'Enviar mensagem','ct.ph1':'Seu nome','ct.ph2':'Empresa','ct.ph3':'Qual é o seu principal desafio hoje?',
+  'ft.c1':'© 2026 Daxia Consultoria · Belo Horizonte, Brasil',
+  'ft.c2':'Diagnóstico primeiro. Tecnologia quando faz sentido.'
+},
+en:{
+  title:'Daxia Consultoria — Management & Digital Transformation',
+  'nav.sobre':'About','nav.servicos':'Services','nav.projetos':'Projects','nav.samuel':'About Me','nav.parceria':'Partnerships','nav.contato':'Contact','nav.cta':'Contact Us',
+  'hero.eyebrow':'Management, data and technology consulting',
+  'hero.sub':'We understand the operation before proposing any solution. We structure the process. Then we find or build the right tool to make it work.',
+  'hero.btn1':'Contact Us','hero.btn2':'See approach',
+  'hero.title':'<span class="solid">Plan with <span class="key key-method">method</span>.</span><span class="solid">Decide with <span class="key key-data">data</span>.</span><span class="solid">Transform with <span class="key key-tech">technology</span>.</span>',
+  'hero.v1':'18+ years','hero.v3':'Official Actio Partner',
+  'hero.m1':'Management experience','hero.m2':'AI and digital transformation','hero.m3':'Falconi Group Platform',
+  'mq.1':'Diagnosis before the solution','mq.2':'Processes that reduce rework','mq.3':'Data that answers real questions','mq.4':'AI applied with judgment','mq.5':'Management and monitoring routine','mq.6':'Custom digital solutions',
+  'sobre.eyebrow':'About Daxia',
+  'sobre.title':'Before the tool, <span class="accent">the real map of the operation</span>',
+  'p1t':'Diagnosis','p1d':'Objective reading of the operation, bottlenecks, responsibilities and losses.',
+  'p2t':'Prioritization','p2d':'Separation of symptom from cause to define what needs to come first.',
+  'p3t':'Execution','p3d':'Processes, indicators and technology applied with monitoring routines.',
+  'sobre.lead':'Technology only creates value when <span class="accent">the problem is well defined and the process is clear.</span>',
+  'sobre.b1':'Daxia combines management, data and technology to understand the operation, separate symptom from cause and build an executable path.',
+  'sobre.b2':'As an official Actio partner — Falconi Group\'s management platform — we support platform implementation and adoption, connecting strategy, goals, indicators and management routines in a single environment.',
+  'pq.title':'Who Daxia is for',
+  'pq.1':'Companies that have grown but still operate with fragile controls and scattered decisions',
+  'pq.2':'Managers who need to identify bottlenecks before they become cost, delays or rework',
+  'pq.3':'Organizations that want to use data and AI with judgment, not as a trend',
+  'pq.4':'Leaders who need a method to turn intention into execution',
+  'sv.eyebrow':'What we do',
+  'sv.title':'Services to transform <span class="accent">operation into decision</span>',
+  'sv.intro':'Work can start with a targeted diagnosis or a broader transformation. The criterion is always the same: understand, prioritize and execute.',
+  'sv.1t':'Operations diagnosis','sv.1d':'Objective identification of where time, margin and energy are being lost.',
+  'sv.2t':'Processes and management routines','sv.2d':'Mapping and simplification of flows to reduce rework and dependency.',
+  'sv.3t':'Indicators and data','sv.3d':'Metrics that answer real management questions and anticipate problems.',
+  'sv.4t':'Planning and governance','sv.4d':'Goals, owners, rituals and discipline to turn plan into execution.',
+  'sv.5t':'Flow-driven digitalization','sv.5d':'Tools designed from the work routine, not the other way around.',
+  'sv.6t':'Custom digital solutions','sv.6d':'Custom systems, automations and platforms. When the market doesn\'t have what you need, we build it.',
+  'pj.eyebrow':'Projects & Solutions',
+  'pj.title':'Products and cases from <span class="accent">concrete problems</span>',
+  'pj.tab2':'Constr. ERP','pj.tab3':'Education',
+  'dl.c':'Challenge','dl.s':'Solution applied','dl.r':'Results achieved','dl.re':'Expected results','dl.t':'Technologies / Tools',
+  'p0.seg':'Construction · Project management','p0.c':'Bringing visibility to a fragmented construction routine across schedules, field records, teams and suppliers.','p0.s':'SaaS platform connecting portfolio tracking, digital construction log and executive indicators.','p0.r':'Centralized operations, clearer status and management decisions supported by up-to-date data.','p0.t':'SaaS Platform · Executive Dashboard · Digital Construction Log','p0.c1':'Connected operation','p0.c2':'Real-time data',
+  'p1.seg':'Digital product · Generative artificial intelligence','p1.c':'Avoiding context loss and ambiguities between discovery, business and development conversations.','p1.s':'AI-guided interviews that structure requirements, evidence, gaps, SRS and Prompt Packs.','p1.r':'Organized requirements, visible gaps and more consistent context handoff for teams.','p1.t':'Generative AI · SRS · Prompt Packs · Structured outputs','p1.c1':'Structured discovery','p1.c2':'SRS & Prompt Pack',
+  'p2.nome':'Custom ERP for construction','p2.seg':'Construction · Custom ERP','p2.c':'Unifying contracts, measurements, financials and procurement previously managed in separate flows.','p2.s':'ERP integrated by project and cost center, with operational modules and executive dashboard.','p2.r':'Single view of operations, centralized controls and consolidated indicators for leadership.','p2.t':'Custom web ERP · Executive Dashboard · Financial and procurement modules','p2.c1':'Executive view','p2.c2':'Centralized operations',
+  'p3.nome':'School management system','p3.seg':'Education · Operational management','p3.c':'Organizing enrollment, attendance, students, guardians, staff and reports for an educational operation with multiple administrative routines.','p3.s':'Web system with modules for students, attendance lists, staff, service map, indicators and management reports.','p3.r':'Centralized information for coordination, clearer routine monitoring and management view for decision-making.','p3.t':'Custom web system · Educational BI · Attendance management · Student enrollment · Operational reports','p3.c1':'School routine','p3.c2':'Integrated management',
+  'p4.seg':'Career · Applied artificial intelligence','p4.c':'Transforming LinkedIn and resume into an actionable professional positioning diagnosis.','p4.s':'GapScore™ across six dimensions, profile evidence, benchmark and action plan for 7, 30 and 90 days.','p4.r':'Prioritized gaps, practical recommendations and permanent report delivered via private link.','p4.t':'Next.js · TypeScript · Supabase · OpenAI API · Mercado Pago Pix · Resend','p4.c1':'Diagnosis in up to 48h','p4.c2':'GapScore™ · 6 dimensions',
+  'p5.seg':'Tourism & hospitality · Landing page','p5.c':'Translating the property\'s experience and story beyond the Airbnb listing and guiding the booking.','p5.s':'Premium responsive landing page with narrative, amenities and clear calls to booking.','p5.r':'Own digital presence, clearer differentiation and direct journey to Airbnb booking.','p5.t':'Responsive landing page · Airbnb integration · Conversion-oriented design','p5.c1':'Own digital presence','p5.c2':'Book via Airbnb',
+  'p6.seg':'Sports & community · Mobile app','p6.c':'Organizing recurring matches, members, attendance, lineups and finances in a single flow.','p6.s':'Mobile app for confirmations, check-ins, teams, performance and payment control.','p6.r':'Centralized administration, more predictable attendance and clearer financial control for the group.','p6.t':'Mobile app · Member management · Check-in · Financial control','p6.c1':'Game management','p6.c2':'Mobile first',
+  'p7.seg':'Family education · AI applied to learning','p7.c':'Helping families transform school content, BNCC skills or parent-submitted materials into experiences children truly want to explore.','p7.s':'Educational platform with guardian curation, adaptation by age, grade and reading level, generating comics, games, quizzes and music.','p7.r':'Lighter learning, progress tracking and personalized experiences for children to truly understand: "Used Plim, learned!".','p7.t':'Mobile product · Generative AI with guardian approval · BNCC curriculum · Educational games · Progress tracking','p7.c1':'Used Plim, learned!','p7.c2':'BNCC into experiences','p7.s1':'<span>1.</span> Choose content','p7.s2':'<span>2.</span> Choose format','p7.s3':'<span>3.</span> Configure the activity','p7.s4':'<span>4.</span> Learn through play',
+  'sm.eyebrow':'The person behind it',
+  'sm.quote':'"AI has democratized the creation of solutions. Problem-solving remains a human competency. That is why we start by deeply understanding the problem before defining any technology."',
+  'sm.cargo':'Founder of Daxia · Management and operational transformation',
+  'sm.b1':'Consultant and entrepreneur with <strong>over 18 years of experience</strong> in management, processes and operational transformation in mid and high complexity organizations.',
+  'sm.b2':'Connects strategy, data and technology to understand business problems, structure decisions and build digital solutions when they truly make sense.',
+  'sm.c1':'18+ years of management experience','sm.c2':'AI and digital transformation training at MIT Professional Education','sm.c3':'Official Actio partner — Falconi Group\'s management platform','sm.c4':'Architect of digital solutions for management',
+  'sm.mit':'Artificial Intelligence and Digital Transformation',
+  'par.kicker':'Official Actio Brazil Partner',
+  'par.title':'Strategy with method. <span>Execution with technology.</span>',
+  'par.body':'DAXIA acts as a commercial and strategic partner of Actio, the Falconi ecosystem\'s integrated corporate management platform, supporting companies in structuring, executing and monitoring their strategies, indicators, projects and transformation initiatives.',
+  'par.st1':'years in the market','par.st2':'clients worldwide','par.st3':'users','par.st4':'available languages',
+  'par.m1':'Strategic diagnosis','par.m2':'Indicator and KPI management','par.m3':'Project and portfolio management','par.m4':'Governance and compliance','par.m5':'Implementation and adoption support',
+  'par.cta':'Explore the Actio Platform',
+  'act.grid':'<span>Strategy<br>Performance</span><span>Risk<br>Compliance</span><span>Processes<br>Operations</span><span>People</span>',
+  'act.small':'Integrated management platform',
+  'act.note':'Falconi ecosystem · corporate management · strategic execution',
+  'act.n1':'Strategy<small>goals · KPIs</small>','act.n2':'Projects<small>portfolio</small>','act.n3':'Risks<small>controls</small>','act.n4':'People<small>performance</small>','act.n5':'Compliance<small>audit</small>','act.n6':'AI<small>insights</small>',
+  'ct.eyebrow':"Let's talk",
+  'ct.title':'What bottleneck is <span class="accent">limiting your growth?</span>',
+  'ct.lead':'The first conversation is to organize the problem, not to sell a tool.',
+  'ct.body':"Briefly describe the challenge: process, indicator, system, management routine or decision that currently requires too much effort. I'll respond within 24 hours.",
+  'ct.btn':'Send message','ct.ph1':'Your name','ct.ph2':'Company','ct.ph3':'What is your main challenge today?',
+  'ft.c1':'© 2026 Daxia Consultoria · Belo Horizonte, Brazil',
+  'ft.c2':'Diagnosis first. Technology when it makes sense.'
+}};
+
+function setLang(lang){
+  var t=T[lang];
+  // Nav
+  var nl=document.querySelectorAll('#nav .nav-links li a');
+  ['nav.sobre','nav.servicos','nav.projetos','nav.samuel','nav.parceria','nav.contato'].forEach(function(k,i){if(nl[i])nl[i].textContent=t[k];});
+  _t('#nav .nav-cta',t['nav.cta']);
+  // Hero
+  _h('.hero-title',t['hero.title']);
+  _t('.hero-eyebrow',t['hero.eyebrow']);
+  _t('.hero-sub',t['hero.sub']);
+  _t('.hero-cta-row .btn-primary',t['hero.btn1']);
+  _t('.hero-cta-row .btn-ghost',t['hero.btn2']);
+  var hm=document.querySelectorAll('#inicio .hero-proof-cards .hero-metric');
+  ['hero.m1','hero.m2','hero.m3'].forEach(function(k,i){var lbl=hm[i]&&hm[i].querySelector('.lbl');if(lbl)lbl.textContent=t[k];});
+  if(hm[0]){var v0=hm[0].querySelector('.val');if(v0)v0.textContent=t['hero.v1'];}
+  if(hm[2]){var v2=hm[2].querySelector('.val');if(v2)v2.textContent=t['hero.v3'];}
+  // Marquee
+  document.querySelectorAll('.marquee-item').forEach(function(el,i){
+    var dot=el.querySelector('.marquee-dot');
+    el.textContent=t['mq.'+((i%6)+1)];
+    if(dot)el.insertBefore(dot,el.firstChild);
+  });
+  // Sobre
+  _t('#sobre .section-eyebrow',t['sobre.eyebrow']);
+  _h('#sobre .section-title',t['sobre.title']);
+  var pt=document.querySelectorAll('#sobre .pilar-title'),pd=document.querySelectorAll('#sobre .pilar-desc');
+  [1,2,3].forEach(function(n){if(pt[n-1])pt[n-1].textContent=t['p'+n+'t'];if(pd[n-1])pd[n-1].textContent=t['p'+n+'d'];});
+  _h('.sobre-lead',t['sobre.lead']);
+  var sbp=document.querySelectorAll('#sobre .sobre-body p');
+  if(sbp[0])sbp[0].textContent=t['sobre.b1'];
+  if(sbp[1])sbp[1].textContent=t['sobre.b2'];
+  _t('.para-quem-title',t['pq.title']);
+  document.querySelectorAll('.para-quem-grid .pqi').forEach(function(el,i){el.textContent=t['pq.'+(i+1)];});
+  // Serviços
+  _t('#servicos .section-eyebrow',t['sv.eyebrow']);
+  _h('#servicos .section-title',t['sv.title']);
+  _t('.servicos-intro',t['sv.intro']);
+  var svt=document.querySelectorAll('.servico-title'),svd=document.querySelectorAll('.servico-desc');
+  [1,2,3,4,5,6].forEach(function(n){if(svt[n-1])svt[n-1].textContent=t['sv.'+n+'t'];if(svd[n-1])svd[n-1].textContent=t['sv.'+n+'d'];});
+  // Projetos
+  _t('#projetos .section-eyebrow',t['pj.eyebrow']);
+  _h('#projetos .section-title',t['pj.title']);
+  var tabs=document.querySelectorAll('.proj-tab');
+  if(tabs[2])tabs[2].textContent=t['pj.tab2'];
+  if(tabs[3])tabs[3].textContent=t['pj.tab3'];
+  // Detail labels
+  var lblMap=['dl.c','dl.s','dl.r','dl.t'];
+  document.querySelectorAll('.proj-detail-label').forEach(function(el,i){
+    var panel=Math.floor(i/4),mod=i%4;
+    var k=(mod===2&&panel===7)?'dl.re':lblMap[mod];
+    el.textContent=t[k];
+  });
+  // Detail p's
+  var pkeys=['c','s','r','t'];
+  document.querySelectorAll('.proj-detail p').forEach(function(el,i){
+    var k='p'+Math.floor(i/4)+'.'+pkeys[i%4];
+    if(t[k])el.textContent=t[k];
+  });
+  // Nomes
+  var nomes=document.querySelectorAll('.proj-nome');
+  if(nomes[2]&&t['p2.nome'])nomes[2].textContent=t['p2.nome'];
+  if(nomes[3]&&t['p3.nome'])nomes[3].textContent=t['p3.nome'];
+  // Segmentos
+  document.querySelectorAll('.proj-segmento').forEach(function(el,i){if(t['p'+i+'.seg'])el.textContent=t['p'+i+'.seg'];});
+  // Live chips per panel
+  document.querySelectorAll('.proj-panel').forEach(function(panel,i){
+    var chips=panel.querySelectorAll('.live-chip');
+    if(chips[0]&&t['p'+i+'.c1'])chips[0].textContent=t['p'+i+'.c1'];
+    if(chips[1]&&t['p'+i+'.c2'])chips[1].textContent=t['p'+i+'.c2'];
+  });
+  // Plim steps
+  document.querySelectorAll('.plim-label').forEach(function(el,i){if(t['p7.s'+(i+1)])el.innerHTML=t['p7.s'+(i+1)];});
+  // Samuel
+  _t('#samuel .section-eyebrow',t['sm.eyebrow']);
+  _t('#samuel .sq',t['sm.quote']);
+  _t('.samuel-cargo',t['sm.cargo']);
+  var bp=document.querySelectorAll('#samuel .samuel-bio p');
+  if(bp[0])bp[0].innerHTML=t['sm.b1'];
+  if(bp[1])bp[1].textContent=t['sm.b2'];
+  var cs=document.querySelectorAll('#samuel .creds-premium .cred span:last-child');
+  [1,2,3,4].forEach(function(n){if(cs[n-1])cs[n-1].textContent=t['sm.c'+n];});
+  var md=document.querySelector('.mit-desc');
+  if(md)md.innerHTML='<strong>MIT Professional Education</strong><br>'+t['sm.mit'];
+  // Parceria
+  _t('.strategy-kicker',t['par.kicker']);
+  _h('.strategy-title',t['par.title']);
+  var pb=document.querySelectorAll('#parceria .parceria-copy > p')[1];
+  if(pb)pb.textContent=t['par.body'];
+  var as=document.querySelectorAll('#parceria .actio-proof-grid div span');
+  [1,2,3,4].forEach(function(n){if(as[n-1])as[n-1].textContent=t['par.st'+n];});
+  var am=document.querySelectorAll('#parceria .actio-scope-list span');
+  [1,2,3,4,5].forEach(function(n){if(am[n-1])am[n-1].textContent=t['par.m'+n];});
+  _t('.actio-card-cta',t['par.cta']);
+  // Actio visual
+  document.querySelectorAll('#parceria .actio-module-grid').forEach(function(el){el.innerHTML=t['act.grid'];});
+  document.querySelectorAll('#parceria .actio-platform-card small,#parceria .actio-core-card small').forEach(function(el){el.textContent=t['act.small'];});
+  _t('.actio-visual-note',t['act.note']);
+  var an=document.querySelectorAll('#parceria .actio-node');
+  [1,2,3,4,5,6].forEach(function(n){if(an[n-1])an[n-1].innerHTML=t['act.n'+n];});
+  // Contato
+  _t('#contato .section-eyebrow',t['ct.eyebrow']);
+  _h('#contato .section-title',t['ct.title']);
+  _t('.contato-lead',t['ct.lead']);
+  _t('.contato-body',t['ct.body']);
+  _t('.contato-form .fs',t['ct.btn']);
+  var ti=document.querySelectorAll('.contato-form input[type="text"]');
+  if(ti[0])ti[0].placeholder=t['ct.ph1'];
+  if(ti[1])ti[1].placeholder=t['ct.ph2'];
+  var ta=document.querySelector('.contato-form textarea');
+  if(ta)ta.placeholder=t['ct.ph3'];
+  // Footer
+  var fc=document.querySelectorAll('footer .fc');
+  if(fc[0])fc[0].textContent=t['ft.c1'];
+  if(fc[1])fc[1].textContent=t['ft.c2'];
+  // Meta
+  document.title=t.title;
+  document.documentElement.lang=lang==='pt'?'pt-BR':'en';
+  var bp2=document.getElementById('btn-pt'),be=document.getElementById('btn-en');
+  if(bp2)bp2.classList.toggle('lang-active',lang==='pt');
+  if(be)be.classList.toggle('lang-active',lang==='en');
+  localStorage.setItem('daxia_lang',lang);
+}
+function _t(sel,val){var el=document.querySelector(sel);if(el&&val)el.textContent=val;}
+function _h(sel,val){var el=document.querySelector(sel);if(el&&val)el.innerHTML=val;}
+
+// Init
+(function(){var s=localStorage.getItem('daxia_lang');if(s&&s!=='pt')setLang(s);})();
 </script>
 </body>
 </html>
