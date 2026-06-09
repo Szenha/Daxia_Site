@@ -1595,6 +1595,297 @@ nav{padding:.52rem 3.5rem}.nav-logo-img{height:38px}nav.scrolled{padding:.42rem 
   }
 }
 
+/* ===== ETAPA 1 — Responsividade: breakpoints, max-width, fontes, overflow ===== */
+
+/* 1. PADDING HORIZONTAL FLUIDO */
+/* Seções: transição suave de 1.5rem (≤480px) até 3.5rem (≥1400px) */
+section{
+  padding-left:clamp(1.5rem,4vw,3.5rem);
+  padding-right:clamp(1.5rem,4vw,3.5rem);
+}
+@media(max-width:960px){
+  section{
+    padding-left:clamp(1rem,3.5vw,1.5rem);
+    padding-right:clamp(1rem,3.5vw,1.5rem);
+  }
+}
+/* Nav: mesmo princípio — não altera padding vertical */
+nav,nav.scrolled{
+  padding-left:clamp(1rem,4.2vw,3.5rem);
+  padding-right:clamp(1rem,4.2vw,3.5rem);
+}
+@media(max-width:960px){
+  nav,nav.scrolled{
+    padding-left:1rem;
+    padding-right:1rem;
+  }
+}
+/* Footer: mantém visual proporcional */
+footer{
+  padding-left:clamp(1.5rem,4vw,5rem);
+  padding-right:clamp(1.5rem,4vw,5rem);
+}
+
+/* 2. MAX-WIDTH CONTEÚDO EM TELAS LARGAS (≥1472px) */
+/* Transição exata: em 1472px calc() retorna 56px = 3.5rem, igual ao clamp acima */
+@media(min-width:1472px){
+  .hero,
+  #sobre,
+  #servicos,
+  #projetos,
+  #samuel,
+  #contato{
+    padding-left:calc((100% - 1360px) / 2)!important;
+    padding-right:calc((100% - 1360px) / 2)!important;
+  }
+}
+
+/* 3. BREAKPOINT INTERMEDIÁRIO: 961px–1100px */
+@media(min-width:961px) and (max-width:1100px){
+  /* Sobre: colapsa para 1 coluna — process-flow fica com ~900px de respiro */
+  #sobre .sobre-layout{
+    grid-template-columns:1fr!important;
+    gap:2rem!important;
+  }
+  #sobre .sobre-right{
+    transform:none;
+  }
+  /* Samuel: reduz gap mas mantém 2 colunas */
+  .samuel-layout{
+    gap:2rem!important;
+  }
+  /* Projetos: gap menor para mockup não ficar comprimido */
+  .proj-panel.active{
+    gap:2rem!important;
+  }
+  .real-visual{
+    min-height:300px!important;
+  }
+}
+
+/* Contato: gap fluido em desktop (reduz compressão em 961–1300px) */
+@media(min-width:961px){
+  .contato-layout{
+    gap:min(6rem,6vw)!important;
+  }
+}
+
+/* 4. CORREÇÃO: translateY fixo na seção Parceria */
+/* Substitui transform por padding-top para ser layout-safe */
+#parceria .strategy-side{
+  transform:none!important;
+}
+@media(min-width:961px){
+  #parceria .strategy-side{
+    padding-top:2.5rem;
+  }
+}
+@media(max-width:960px){
+  #parceria .strategy-side{
+    padding-top:0;
+  }
+}
+
+/* 5. FONTES FUNCIONAIS — mínimo legível em monitores DPR 1× */
+
+/* Cards de serviço */
+@media(min-width:961px){
+  #servicos .service-card .servico-desc{
+    font-size:0.78rem!important;
+    line-height:1.5!important;
+  }
+}
+
+/* Detalhes dos projetos */
+.proj-detail p{
+  font-size:0.78rem!important;
+}
+
+/* Seção Parceria / Actio */
+#parceria .actio-proof-grid span{
+  font-size:0.72rem!important;
+  line-height:1.35!important;
+}
+#parceria .actio-scope-list span{
+  font-size:0.78rem!important;
+}
+#parceria .actio-platform-card small{
+  font-size:0.68rem!important;
+}
+#parceria .actio-visual-note{
+  font-size:0.68rem!important;
+  line-height:1.3!important;
+}
+#parceria .strategy-kicker{
+  font-size:0.62rem!important;
+}
+
+/* Labels secundários dos proof cards */
+.hero-proof-cards .lbl{
+  font-size:0.62rem!important;
+}
+
+/* Links de navegação em tablet */
+@media(max-width:960px){
+  .nav-links a{
+    font-size:0.64rem!important;
+  }
+}
+
+/* 6. OVERFLOW HORIZONTAL */
+/* Plim flow: 4 devices fixos (~500px) contidos dentro do showcase */
+.plim-showcase{
+  overflow-x:hidden;
+}
+
+/* ===== FIM ETAPA 1 ===== */
+
+/* ===== Etapa 1.1 — Densidade vertical para viewports curtos ===== */
+/*
+   Limiar: max-height:740px
+   Cobre:  1366×768 (~688px real), Windows 125% (~534px), Windows 150% (~653px), tablet landscape (~682px)
+   Não afeta: 1440×900 (~820px), 1920×1080 (~994px)
+*/
+@media(max-height:740px){
+
+  /* A — PADDING VERTICAL DAS SEÇÕES */
+  /* section!important supera seletores ID sem !important (#sobre 3.85rem, #servicos 3.45rem, etc.) */
+  section{
+    padding-top:    clamp(1.8rem,4vh,3.2rem)!important;
+    padding-bottom: clamp(1.8rem,4vh,3.2rem)!important;
+  }
+  /* Parceria usa seletor ID com !important — precisa de override explícito */
+  #parceria{
+    padding-top:    clamp(1.8rem,4vh,3rem)!important;
+    padding-bottom: clamp(1.8rem,4vh,3rem)!important;
+  }
+
+  /* B — HERO: liberar min-height e comprimir padding vertical */
+  /* .hero!important supera section!important (especificidade 0-1-0 > 0-0-1) */
+  .hero{
+    min-height:     auto!important;
+    padding-top:    clamp(2rem,5vh,4.45rem)!important;
+    padding-bottom: clamp(1.2rem,2.5vh,2.1rem)!important;
+  }
+  .hero-sub{
+    margin-top:  .9rem!important;
+    line-height: 1.62!important;
+  }
+  .hero-cta-row{
+    margin-top: .9rem!important;
+  }
+  .hero-proof-cards{
+    margin-top: 1rem!important;
+  }
+  .hero-proof-cards .hero-metric{
+    padding:    .65rem .85rem!important;
+    min-height: 0!important;
+  }
+
+  /* C — MARGIN-TOP INTERNOS */
+  .samuel-layout{
+    margin-top: 1.5rem!important;
+  }
+  .contato-layout{
+    margin-top: 1.5rem!important;
+  }
+  .proj-panel.active{
+    margin-top: 1.2rem!important;
+  }
+  .projetos-tabs{
+    margin-top: 1.2rem!important;
+  }
+  #sobre .sobre-layout{
+    margin-top: 1rem!important;
+  }
+
+  /* D — LINE-HEIGHT EM BLOCOS LONGOS */
+  .samuel-bio{
+    line-height: 1.62!important;
+  }
+  .contato-body{
+    line-height: 1.65!important;
+  }
+  #sobre .sobre-body{
+    line-height: 1.62!important;
+  }
+  #parceria .strategy-hero-card>p:not(.strategy-kicker){
+    line-height: 1.62!important;
+  }
+
+  /* E — MOCKUP MIN-HEIGHTS */
+  .real-visual{
+    min-height:    260px!important;
+    margin-bottom: 1.2rem;
+  }
+  .mobile-visual{
+    min-height:    340px!important;
+    margin-bottom: 1.2rem;
+  }
+  .letsgol-visual{
+    min-height: 380px!important;
+  }
+
+  /* F — PARA-QUEM-WIDE: compressão vertical */
+  .para-quem-wide{
+    margin-top: 1rem!important;
+    padding:    .85rem 1.1rem!important;
+  }
+  .para-quem-grid .pqi{
+    padding:     .55rem .7rem;
+    font-size:   .84rem;
+    line-height: 1.45;
+  }
+
+  /* G — SAMUEL: itens internos da coluna esquerda */
+  .samuel-left{
+    gap: 1.2rem;
+  }
+  .creds-premium{
+    gap:        .3rem;
+    margin-top: .4rem;
+  }
+  .mit-block{
+    padding:    .6rem 0!important;
+    margin-top: .3rem;
+  }
+
+  /* ===== Grupo A — Etapa 1.2 ===== */
+
+  /* A1 — Parceria: margin-top e strategy-image-card (omitidos na 1.1) */
+  .parceria-layout{
+    margin-top: 1.5rem!important;
+  }
+  .strategy-image-card{
+    min-height: 260px!important;
+  }
+  #parceria .strategy-side{
+    padding-top: 4.25rem!important;
+  }
+
+  /* A2 — Projetos: comprimir padding dos blocos de detalhe */
+  .proj-detail{
+    padding: .35rem 0!important;
+  }
+
+  /* A3 — Samuel: creds cards, gap da coluna direita, sq-block */
+  .creds-premium .cred{
+    padding: .42rem .65rem!important;
+  }
+  .samuel-right{
+    gap: .45rem!important;
+  }
+  .sq-block{
+    padding: .9rem 1.1rem!important;
+  }
+  .sq{
+    font-size:   .82rem!important;
+    line-height: 1.5!important;
+  }
+
+}
+/* ===== Fim Etapa 1.1 ===== */
+
 </style>
 </head>
 <body>
