@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MY6TVH7PXZ"></script>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());
+gtag('config','G-MY6TVH7PXZ');
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Daxia Consultoria — Gestão & Transformação Digital</title>
@@ -3244,6 +3252,27 @@ footer{
 <script>
 const nav=document.getElementById('nav');
 let currentLang=document.documentElement.lang.startsWith('en')?'en':'pt';
+function trackAnalyticsEvent(eventName,params={}){
+  if(typeof gtag==='function')gtag('event',eventName,params);
+}
+document.addEventListener('click',event=>{
+  const target=event.target instanceof Element?event.target:null;
+  if(!target)return;
+  const link=target.closest('a');
+  if(link){
+    const href=link.getAttribute('href')||'';
+    const eventParams={link_url:link.href,link_text:link.textContent.trim()};
+    if(href.startsWith('https://wa.me/'))trackAnalyticsEvent('whatsapp_click',eventParams);
+    else if(href.startsWith('mailto:'))trackAnalyticsEvent('email_click',eventParams);
+    else if(link.hostname&&link.hostname.includes('linkedin.com'))trackAnalyticsEvent('linkedin_click',eventParams);
+  }
+  const cta=target.closest('.nav-cta,.hero-cta-row a,.actio-card-cta,.actio-link,.service-more,.project-more,.obrify-site-link');
+  if(cta)trackAnalyticsEvent('cta_click',{
+    cta_text:cta.textContent.trim(),
+    cta_url:cta.href||'',
+    cta_location:cta.closest('section')?.id||'nav'
+  });
+});
 const sectionOrder=['sobre','samuel','servicos','parceria','projetos','contato'];
 const footer=document.querySelector('footer');
 sectionOrder.forEach(id=>{
@@ -3619,6 +3648,7 @@ function handleSubmit(e){
   .then(r=>r.json())
   .then(data=>{
     if(data.success){
+      trackAnalyticsEvent('contact_form_submit',{form_name:'contato'});
       btn.textContent='Mensagem enviada ✓';btn.style.background='var(--teal2)';
       form.reset();
       setTimeout(()=>{btn.textContent=orig;btn.style.background='';btn.disabled=false;},4000);
